@@ -16,15 +16,16 @@ limitations under the License.
 #ifndef SERIALIO_H
 #define SERIALIO_H
 
-#include <Arduino.h>
 #include <stdint.h>
 
+uint64_t millis();
 #include "checksum.h"
 #include "comms.h"
-#include "packet_types.h"
+
+// Public functions
 
 void serialIO_init();
-void serialIO_send(enum msgType type, enum dataID id, char *data, uint8_t len);
+void serialIO_send(uint8_t b);
 bool serialIO_dataAvailable();
 void serialIO_readByte(char *buffer);
 
