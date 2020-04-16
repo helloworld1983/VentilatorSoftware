@@ -3,7 +3,9 @@ version: 2.1
 jobs:
   gui-static-analysis:
     machine:
+      resource_class: 2xlarge
       image: ubuntu-1604:201903-01
+      docker_layer_caching: true
     steps:
       - checkout
       - run:
@@ -18,7 +20,9 @@ jobs:
 
   gui-build-image:
     machine:
+      resource_class: 2xlarge
       image: ubuntu-1604:201903-01
+      docker_layer_caching: true
     steps:
       - checkout
       - run:
