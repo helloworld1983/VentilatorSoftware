@@ -4,26 +4,38 @@
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
+#include "datasource.h"
+#include "tests/testsuite.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
   app.setWindowIcon(QIcon(":/Logo.png"));
 
-  QCommandLineParser parser;
-  parser.setApplicationDescription("Ventilator GUI application");
-  parser.addHelpOption();
-  //  parser.addVersionOption();
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Ventilator GUI application");
+    parser.addHelpOption();
 
-  QCommandLineOption dieOption(
-      QStringList() << "d"
-                    << "die",
-      QApplication::translate("main", "Die right away (for testing)"));
-  parser.addOption(dieOption);
+    QCommandLineOption testOption(QStringList() << "t" << "test",
+                                QApplication::translate("main", "Run test suites"));
+    parser.addOption(testOption);
+    parser.process(app);
 
-  parser.process(app);
-
-  bool die_now = parser.isSet(dieOption);
+    // If the app is run with -t, run tests
+    if (parser.isSet(testOption)) 
+    {
+      int failedSuitesCount = 0;
+      QVector<QObject*>::iterator iter;
+      for (iter = TestSuite::suites_.begin(); iter != TestSuite::suites_.end(); ++iter) 
+      {
+          int result = QTest::qExec(*iter);
+          if (result != 0) 
+          {
+              failedSuitesCount++;
+          }
+      }
+      return failedSuitesCount;
+    }
 
   QQuickView mainView;
   QString extraImportPath(QStringLiteral("%1/../../../%2"));
@@ -55,6 +67,11 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
   }
 
-  mainView.show();
-  return app.exec();
+    if (parser.isSet("h"))
+    {
+      return EXIT_SUCCESS;
+    }
+
+    mainView.show();
+    return app.exec();
 }
