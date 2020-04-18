@@ -83,19 +83,19 @@ typedef struct _ControlerAlarm {
 } ControlerAlarm;
 
 typedef struct _ControllerIdentification {
-  uint64_t time;
-  uint32_t version_fw;
-  uint32_t version_hw;
-  pb_callback_t about;
+    uint64_t time;
+    uint32_t version_fw;
+    uint32_t version_hw;
+    const char *about;
 } ControllerIdentification;
 
 typedef struct _ControllerStatus {
-  uint64_t time;
-  float pressure;
-  float volume;
-  float flow;
-  bool has_alarm_flags;
-  uint32_t alarm_flags;
+    uint64_t time;
+    float pressure;
+    float volume;
+    float flow;
+    bool has_alarm_flags;
+    uint32_t alarm_flags;
 } ControllerStatus;
 
 typedef struct _ControllerValue {
@@ -120,6 +120,7 @@ typedef struct _ControllerData {
 } ControllerData;
 
 typedef struct _Packet {
+  pb_callback_t cb_payload;
   pb_size_t which_payload;
   union {
     Command cmd;
@@ -147,57 +148,29 @@ typedef struct _Packet {
 #define _AlarmLevel_ARRAYSIZE ((AlarmLevel)(AlarmLevel_HIGH + 1))
 
 /* Initializer values for message structs */
-#define Command_init_default                                                   \
-  { _CommandType_MIN, false, 0 }
-#define GuiAck_init_default                                                    \
-  { 0 }
+#define Command_init_default                     {_CommandType_MIN, false, 0}
+#define GuiAck_init_default                      {0}
 #define ControllerStatus_init_default                                          \
   { 0, 0, 0, 0, false, 0 }
-#define ControllerIdentification_init_default                                  \
-  {                                                                            \
-    0, 0, 0, { {NULL}, NULL }                                                  \
-  }
-#define ControlerAlarm_init_default                                            \
-  {                                                                            \
-    _AlarmLevel_MIN, _AlarmType_MIN, { {NULL}, NULL }                          \
-  }
-#define ControllerValue_init_default                                           \
-  { false, 0 }
-#define ControllerData_init_default                                            \
-  {                                                                            \
-    _ControllerMsgType_MIN, _CommandType_MIN, 0, {                             \
-      ControllerStatus_init_default                                            \
-    }                                                                          \
-  }
+#define ControllerIdentification_init_default    {0, 0, 0, {{NULL}, NULL}}
+#define ControlerAlarm_init_default              {_AlarmLevelType_MIN, _AlarmType_MIN, {{NULL}, NULL}}
+#define ControllerValue_init_default             {false, 0}
+#define ControllerData_init_default              {_ControllerMsgType_MIN, _CommandType_MIN, 0, {ControllerStatus_init_default}}
 #define Packet_init_default                                                    \
   {                                                                            \
-    0, { Command_init_default }                                                \
+    {{NULL}, NULL}, 0, { Command_init_default }                                \
   }
-#define Command_init_zero                                                      \
-  { _CommandType_MIN, false, 0 }
-#define GuiAck_init_zero                                                       \
-  { 0 }
+#define Command_init_zero                        {_CommandType_MIN, false, 0}
+#define GuiAck_init_zero                         {0}
 #define ControllerStatus_init_zero                                             \
   { 0, 0, 0, 0, false, 0 }
-#define ControllerIdentification_init_zero                                     \
-  {                                                                            \
-    0, 0, 0, { {NULL}, NULL }                                                  \
-  }
-#define ControlerAlarm_init_zero                                               \
-  {                                                                            \
-    _AlarmLevel_MIN, _AlarmType_MIN, { {NULL}, NULL }                          \
-  }
-#define ControllerValue_init_zero                                              \
-  { false, 0 }
-#define ControllerData_init_zero                                               \
-  {                                                                            \
-    _ControllerMsgType_MIN, _CommandType_MIN, 0, {                             \
-      ControllerStatus_init_zero                                               \
-    }                                                                          \
-  }
+#define ControllerIdentification_init_zero       {0, 0, 0, {{NULL}, NULL}}
+#define ControlerAlarm_init_zero                 {_AlarmLevelType_MIN, _AlarmType_MIN, {{NULL}, NULL}}
+#define ControllerValue_init_zero                {false, 0}
+#define ControllerData_init_zero                 {_ControllerMsgType_MIN, _CommandType_MIN, 0, {ControllerStatus_init_zero}}
 #define Packet_init_zero                                                       \
   {                                                                            \
-    0, { Command_init_zero }                                                   \
+    {{NULL}, NULL}, 0, { Command_init_zero }                                   \
   }
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -247,12 +220,15 @@ typedef struct _Packet {
 #define ControllerStatus_CALLBACK NULL
 #define ControllerStatus_DEFAULT NULL
 
-#define ControllerIdentification_FIELDLIST(X, a)                               \
-  X(a, STATIC, REQUIRED, UINT64, time, 1)                                      \
-  X(a, STATIC, REQUIRED, UINT32, version_fw, 2)                                \
-  X(a, STATIC, REQUIRED, UINT32, version_hw, 3)                                \
-  X(a, CALLBACK, OPTIONAL, STRING, about, 4)
-#define ControllerIdentification_CALLBACK pb_default_field_callback
+#define ControllerIdentification_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, UINT64,   time,              1) \
+X(a, STATIC,   REQUIRED, UINT32,   version_fw,        2) \
+X(a, STATIC,   REQUIRED, UINT32,   version_hw,        3) \
+X(a, CALLBACK, OPTIONAL, STRING,   about,             4)
+extern bool ControllerIdentification_callback(pb_istream_t *istream,
+                                              pb_ostream_t *ostream,
+                                              const pb_field_t *field);
+#define ControllerIdentification_CALLBACK ControllerIdentification_callback
 #define ControllerIdentification_DEFAULT NULL
 
 #define ControlerAlarm_FIELDLIST(X, a)                                         \
@@ -282,9 +258,9 @@ typedef struct _Packet {
 #define ControllerData_payload_alert_MSGTYPE ControlerAlarm
 
 #define Packet_FIELDLIST(X, a)                                                 \
-  X(a, STATIC, ONEOF, MESSAGE, (payload, cmd, payload.cmd), 1)                 \
-  X(a, STATIC, ONEOF, MESSAGE, (payload, gui_ack, payload.gui_ack), 2)         \
-  X(a, STATIC, ONEOF, MESSAGE, (payload, data, payload.data), 3)
+  X(a, STATIC, ONEOF, MSG_W_CB, (payload, cmd, payload.cmd), 1)                \
+  X(a, STATIC, ONEOF, MSG_W_CB, (payload, gui_ack, payload.gui_ack), 2)        \
+  X(a, STATIC, ONEOF, MSG_W_CB, (payload, data, payload.data), 3)
 #define Packet_CALLBACK NULL
 #define Packet_DEFAULT NULL
 #define Packet_payload_cmd_MSGTYPE Command

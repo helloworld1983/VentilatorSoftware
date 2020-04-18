@@ -2,12 +2,14 @@
 
 #include "network_protocol.pb.h"
 #include "serdes.h"
+#include "version.h"
 #include <pb_common.h>
 #include <pb_decode.h>
 #include <pb_encode.h>
 #include <stdio.h>
+#include <string.h>
 
-#define PACKET_LEN_MAX (32)
+#define PACKET_LEN_MAX (64)
 uint8_t tx_buffer[PACKET_LEN_MAX];
 
 TEST(SerDesTests, StatusSerialization) {
@@ -47,6 +49,47 @@ TEST(SerDesTests, StatusSerialization) {
   ASSERT_FLOAT_EQ(s.flow, flow);
   // TODO when/if we use alarm flags TEST_ASSERT_EQUAL_INT16(s.alarm_flags,
   // time);
+}
+
+TEST(SerDesTests, ControllerIdentificaitonSerialization) {
+  Version_t vfw;
+  vfw.major = 255;
+  vfw.minor = 255;
+  vfw.patch = 65535;
+
+  Version_t vhw;
+  vhw.major = 255;
+  vhw.minor = 255;
+  vhw.patch = 65535;
+
+  uint64_t time = 42;
+  const char about[] = "123456";
+
+  size_t encoded_data_length;
+  ControllerIdentification cid;
+  cid.time = time;
+  cid.version_fw = vfw.as_uint32;
+  cid.version_hw = vhw.as_uint32;
+  cid.about = about;
+  bool status = serdes_encode_controllerid_packet(
+      cid, tx_buffer, PACKET_LEN_MAX, (size_t *)&encoded_data_length);
+  ASSERT_TRUE(status);
+
+  pb_istream_t stream = pb_istream_from_buffer(tx_buffer, encoded_data_length);
+  Packet packet = Packet_init_zero;
+
+  status = pb_decode(&stream, Packet_fields, &packet);
+
+  ASSERT_TRUE(status);
+  ASSERT_EQ(packet.which_payload, Packet_data_tag);
+  ASSERT_EQ(packet.payload.data.msg_type, ControllerMsgType_STATUS);
+  ASSERT_EQ(packet.payload.data.which_payload,
+            ControllerData_identification_tag);
+
+  cid = packet.payload.data.payload.identification;
+  ASSERT_EQ(cid.version_fw, vfw.as_uint32);
+  ASSERT_EQ(cid.version_hw, vhw.as_uint32);
+  ASSERT_EQ(strcmp((char *)cid.about, about), 0);
 }
 
 bool command_handler_called = false;

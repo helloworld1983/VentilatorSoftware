@@ -1,13 +1,15 @@
 syntax = "proto2";
+import 'nanopb.proto';
 
-enum ControllerMsgType {
-  ACK = 0x10;
-  ERR_CHECK_SUM = 0x11;
-  ERR_MODE = 0x12;
-  ERR_CMD = 0x13;
-  STATUS = 0x20;
-  ALARM = 0x30;
-  DATA = 0x40;
+enum ControllerMsgType 
+{
+    ACK = 			0x10;
+    ERR_CHECK_SUM = 0x11;
+    ERR_MODE = 		0x12;
+    ERR_CMD = 		0x13;
+    STATUS = 		0x20;
+    ALARM = 		0x30;
+    DATA = 			0x40;
 }
 
 enum CommandType {
@@ -80,12 +82,12 @@ message ControllerStatus {
   optional uint32 alarm_flags = 5;
 }
 
-// Sent in ControllerData packet on controller reset
-message ControllerIdentification {
-  required uint64 time = 1;
-  required uint32 version_fw = 2;
-  required uint32 version_hw = 3;
-  optional string about = 4;
+message ControllerIdentification
+{
+	required uint64  time = 1;
+	required uint32 version_fw = 2;
+	required uint32 version_hw = 3;
+	optional string about = 4 [(nanopb).callback_datatype = "const char*"];
 }
 
 enum AlarmType { TO_BE_DEFINED = 0; }
@@ -119,10 +121,12 @@ message ControllerData {
   }
 }
 
-message Packet {
-  oneof payload {
-    Command cmd = 1;
-    GuiAck gui_ack = 2;
-    ControllerData data = 3;
-  }
+message Packet
+{
+  option (nanopb_msgopt).submsg_callback = true;
+	oneof payload {
+	    Command cmd = 1;
+	    GuiAck gui_ack = 2;
+	    ControllerData data = 3;
+	}
 }

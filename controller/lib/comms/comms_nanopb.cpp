@@ -8,6 +8,7 @@
 #include "comms.h"
 #include "network_protocol.pb.h"
 #include "serdes.h"
+#include "version.h"
 
 #define PACKET_LEN_MAX (32)
 static uint8_t tx_buffer[PACKET_LEN_MAX];
@@ -28,7 +29,22 @@ static bool is_time_to_process_packet() {
 }
 
 void comms_sendResetState() {
-  // TODO
+  // TODO solve tx overflow
+  if (output_buffer_ready) {
+    return;
+  }
+
+  ControllerIdentification cid;
+  cid.time = 0; // Hal.millis();
+  cid.version_fw = version_getFwVersion().as_uint32;
+  cid.version_hw = version_getHwVersion().as_uint32;
+  cid.about = version_getAbout();
+
+  bool status = serdes_encode_controllerid_packet(
+      cid, tx_buffer, PACKET_LEN_MAX, (size_t *)&tx_data_length);
+  if (status) {
+    output_buffer_ready = true;
+  }
 }
 
 void comms_sendControllerStatus(ControllerStatus controller_status) {

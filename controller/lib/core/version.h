@@ -15,8 +15,22 @@ limitations under the License.
 
 #ifndef VERSION_H
 #define VERSION_H
+#include <types.h>
+typedef union {
+  struct {
+    uint32_t major : 8;
+    uint32_t minor : 8;
+    uint32_t patch : 16;
+  };
+  uint32_t as_uint32;
+} Version_t;
+
+const Version_t version_fw = {0, 1, 0};
+const Version_t version_hw = {0, 1, 0};
 
 // Guaranteed to be 8 bytes excluding the null-terminator.
-inline const char *version_getVersion() { return "01.01.01"; }
+inline const char *version_getAbout() { return "01.01.01"; }
+inline const Version_t version_getFwVersion() { return version_fw; }
+inline const Version_t version_getHwVersion() { return version_hw; }
 
 #endif // VERSION_H
