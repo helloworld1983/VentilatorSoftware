@@ -22,7 +22,7 @@ create_clean_directory(){
   else
     echo "Creating directory failed: $dir_name"
     return 1
-  fi 
+  fi
 }
 
 
@@ -47,7 +47,7 @@ if [ "$1" == "--help" ] ; then
 cat << EOF
 --help               Display this dialog
 --install            Install dependencies for your platform [$PLATFORM]
---build              Build the gui 
+--build              Build the gui
 
 --test               Test the the existing build in the ./build folder
 --test xvfb          [Linux only!] Same as above, but run tests in xvfb
