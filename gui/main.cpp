@@ -12,34 +12,30 @@ int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
   app.setWindowIcon(QIcon(":/Logo.png"));
 
-    QCommandLineParser parser;
-    parser.setApplicationDescription("Ventilator GUI application");
-    parser.addHelpOption();
+  QCommandLineParser parser;
+  parser.setApplicationDescription("Ventilator GUI application");
+  parser.addHelpOption();
 
-    QCommandLineOption dieOption(QStringList() << "d" << "die",
-                                QApplication::translate("main", "Die right away (for testing)"));
-    parser.addOption(dieOption);
+  QCommandLineOption testOption(QStringList() << "t" << "test",
+                              QApplication::translate("main", "Run test suites"));
+  parser.addOption(testOption);
+  parser.process(app);
 
-    QCommandLineOption testOption(QStringList() << "t" << "test",
-                                QApplication::translate("main", "Run test suites"));
-    parser.addOption(testOption);
-    parser.process(app);
-
-    // If the app is run with -t, run tests
-    if (parser.isSet(testOption)) 
+  // If the app is run with -t, run tests
+  if (parser.isSet(testOption)) 
+  {
+    int failedSuitesCount = 0;
+    QVector<QObject*>::iterator iter;
+    for (iter = TestSuite::suites_.begin(); iter != TestSuite::suites_.end(); ++iter) 
     {
-      int failedSuitesCount = 0;
-      QVector<QObject*>::iterator iter;
-      for (iter = TestSuite::suites_.begin(); iter != TestSuite::suites_.end(); ++iter) 
+      int result = QTest::qExec(*iter);
+      if (result != 0) 
       {
-          int result = QTest::qExec(*iter);
-          if (result != 0) 
-          {
-              failedSuitesCount++;
-          }
+        failedSuitesCount++;
       }
-      return failedSuitesCount;
     }
+    return failedSuitesCount;
+  }
 
   QQuickView mainView;
   QString extraImportPath(QStringLiteral("%1/../../../%2"));
@@ -67,16 +63,11 @@ int main(int argc, char *argv[]) {
   mainView.setResizeMode(QQuickView::SizeRootObjectToView);
   mainView.setColor(QColor("#000000"));
 
-  if (parser.isSet("h") || die_now) {
+  if (parser.isSet("h"))
+  {
     return EXIT_SUCCESS;
   }
 
-    bool die_now = parser.isSet(dieOption);
-    if (parser.isSet("h") || die_now)
-    {
-      return EXIT_SUCCESS;
-    }
-
-    mainView.show();
-    return app.exec();
+  mainView.show();
+  return app.exec();
 }
