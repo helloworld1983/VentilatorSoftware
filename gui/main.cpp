@@ -1,11 +1,11 @@
 #include "datasource.h"
+#include "tests/testsuite.h"
 #include <QCommandLineParser>
 #include <QtCore/QDir>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <QtWidgets/QApplication>
-#include "tests/testsuite.h"
 
 int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
@@ -15,21 +15,21 @@ int main(int argc, char *argv[]) {
   parser.setApplicationDescription("Ventilator GUI application");
   parser.addHelpOption();
 
-  QCommandLineOption testOption(QStringList() << "t" << "test",
-                              QApplication::translate("main", "Run test suites"));
+  QCommandLineOption testOption(
+      QStringList() << "t"
+                    << "test",
+      QApplication::translate("main", "Run test suites"));
   parser.addOption(testOption);
   parser.process(app);
 
   // If the app is run with -t, run tests
-  if (parser.isSet(testOption))
-  {
+  if (parser.isSet(testOption)) {
     int failedSuitesCount = 0;
-    QVector<QObject*>::iterator iter;
-    for (iter = TestSuite::suites_.begin(); iter != TestSuite::suites_.end(); ++iter)
-    {
+    QVector<QObject *>::iterator iter;
+    for (iter = TestSuite::suites_.begin(); iter != TestSuite::suites_.end();
+         ++iter) {
       int result = QTest::qExec(*iter);
-      if (result != 0)
-      {
+      if (result != 0) {
         failedSuitesCount++;
       }
     }
@@ -62,8 +62,7 @@ int main(int argc, char *argv[]) {
   mainView.setResizeMode(QQuickView::SizeRootObjectToView);
   mainView.setColor(QColor("#000000"));
 
-  if (parser.isSet("h"))
-  {
+  if (parser.isSet("h")) {
     return EXIT_SUCCESS;
   }
 

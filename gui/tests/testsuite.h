@@ -5,13 +5,12 @@
 #include <QVector>
 #include <QtTest/QtTest>
 
-class TestSuite : public QObject
-{
-    Q_OBJECT
+class TestSuite : public QObject {
+  Q_OBJECT
 
 public:
-    explicit TestSuite();
-    static QVector<QObject*> suites_;
+  explicit TestSuite();
+  static QVector<QObject *> suites_;
 };
 
 #endif
