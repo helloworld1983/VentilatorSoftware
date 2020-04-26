@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  run-precommit-checks:
+  common-precommit-checks:
     docker:
       - image: circleci/python:3.8
     steps:
@@ -72,9 +72,9 @@ jobs:
 workflows:
   commit:
     jobs:
-      - run-precommit-checks
+      - common-precommit-checks
       - gui-static-analysis
       - gui-build-image:
           requires:
-            - run-precommit-checks
+            - common-precommit-checks
             - gui-static-analysis
