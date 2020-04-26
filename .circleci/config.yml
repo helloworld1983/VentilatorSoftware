@@ -61,7 +61,7 @@ jobs:
             CID=$(docker create respiraworks/gui:$CIRCLE_SHA1)
             docker cp ${CID}:/build ~/project/gui/build
             docker rm ${CID}
-            bash <(curl -s https://codecov.io/bash) -f ~/project/gui/build/coverage.info
+            bash <(curl -s https://codecov.io/bash) -f ~/project/gui/build/coverage-filtered.info
 
 workflows:
   commit:

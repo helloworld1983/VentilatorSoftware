@@ -117,6 +117,7 @@ if [ "$1" == "--build-n-test" ] ; then
   fi
 
   lcov --directory ./build --capture --output-file ./build/coverage.info
+  lcov -r "./build/coverage.info" "*Qt*.framework*" "*.h" "*/tests/*" "*Xcode.app*" "*.moc" "*moc_*.cpp" "*/test/*" "*/build*/*" -o "./build/coverage-filtered.info"
 fi
 
 ##############
@@ -153,4 +154,5 @@ if [ "$1" == "--test" ] ; then
   fi
 
   lcov --directory ./build --capture --output-file ./build/coverage.info
+  lcov -r "./build/coverage.info" "*Qt*.framework*" "*.h" "*/tests/*" "*Xcode.app*" "*.moc" "*moc_*.cpp" "*/test/*" "*/build*/*" -o "./build/coverage-filtered.info"
 fi
