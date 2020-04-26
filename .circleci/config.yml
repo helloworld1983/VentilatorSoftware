@@ -76,4 +76,5 @@ workflows:
       - gui-static-analysis
       - gui-build-image:
           requires:
+            - run-precommit-checks
             - gui-static-analysis
