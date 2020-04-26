@@ -31,9 +31,4 @@ script:
   - ./test.sh
   # Make sure GUI builds.
   - cd gui
-  - mkdir build
-  - cd build
-  - qmake ..
-  - make
-  - ./ProjectVentilatorGUI -d
-  - ./ProjectVentilatorGUI -h
+  - ./gui --build-n-test xvfb

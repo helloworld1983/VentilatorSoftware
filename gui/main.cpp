@@ -16,6 +16,10 @@ int main(int argc, char *argv[]) {
     parser.setApplicationDescription("Ventilator GUI application");
     parser.addHelpOption();
 
+    QCommandLineOption dieOption(QStringList() << "d" << "die",
+                                QApplication::translate("main", "Die right away (for testing)"));
+    parser.addOption(dieOption);
+
     QCommandLineOption testOption(QStringList() << "t" << "test",
                                 QApplication::translate("main", "Run test suites"));
     parser.addOption(testOption);
@@ -67,7 +71,8 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
   }
 
-    if (parser.isSet("h"))
+    bool die_now = parser.isSet(dieOption);
+    if (parser.isSet("h") || die_now)
     {
       return EXIT_SUCCESS;
     }
