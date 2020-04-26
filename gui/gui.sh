@@ -82,6 +82,7 @@ if [ "$1" == "--install" ] ; then
     qml-module-qtquick-controls \
     qml-module-qtquick-controls2 \
     qtdeclarative5-dev-tools \
+    lcov \
     xvfb
   fi
 fi
@@ -101,6 +102,8 @@ if [ "$1" == "--build-n-test" ] ; then
   create_clean_directory build
   qmake -unset QMAKEFEATURES
   cd build && qmake .. && make && cd -
+  lcov --directory ./build --capture --output-file ./build/coverage.info
+  lcov --list /build/coverage.info
 
   if [ "$PLATFORM" == "Darwin" ]; then
     ./build/ProjectVentilatorGUI.app/Contents/MacOS/ProjectVentilatorGUI -t
