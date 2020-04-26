@@ -102,8 +102,6 @@ if [ "$1" == "--build-n-test" ] ; then
   create_clean_directory build
   qmake -unset QMAKEFEATURES
   cd build && qmake .. && make && cd -
-  lcov --directory ./build --capture --output-file ./build/coverage.info
-  lcov --list /build/coverage.info
 
   if [ "$PLATFORM" == "Darwin" ]; then
     ./build/ProjectVentilatorGUI.app/Contents/MacOS/ProjectVentilatorGUI -t
@@ -117,6 +115,10 @@ if [ "$1" == "--build-n-test" ] ; then
       ./build/ProjectVentilatorGUI -t
     fi
   fi
+
+  lcov --directory ./build --capture --output-file ./build/coverage.info
+  lcov -r "./build/coverage.info" "*Qt*.framework*" "*.h" "*/tests/*" "*Xcode.app*" "*.moc" "*moc_*.cpp" "*/test/*" "*/build*/*" -o "./build/coverage-filtered.info"
+  lcov --list ./build/coverage-filtered.info
 fi
 
 ##############
@@ -151,4 +153,8 @@ if [ "$1" == "--test" ] ; then
       ./build/ProjectVentilatorGUI -t
     fi
   fi
+
+  lcov --directory ./build --capture --output-file ./build/coverage.info
+  lcov -r "./build/coverage.info" "*Qt*.framework*" "*.h" "*/tests/*" "*Xcode.app*" "*.moc" "*moc_*.cpp" "*/test/*" "*/build*/*" -o "./build/coverage-filtered.info"
+  lcov --list ./build/coverage-filtered.info
 fi
