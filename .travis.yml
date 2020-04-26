@@ -31,4 +31,4 @@ script:
   - ./test.sh
   # Make sure GUI builds.
   - cd gui
-  - ./gui --build-n-test xvfb
+  - ./gui.sh --build-n-test xvfb
