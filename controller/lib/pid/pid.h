@@ -80,15 +80,12 @@ public:
   double GetKp();     // These functions query the pid for interal values.
   double GetKi();     //  they were created mainly for the pid front-end,
   double GetKd();     // where it's important to know what is actually
+  int GetSampleTime();
   int GetMode();      //  inside the PID.
   int GetDirection(); //
 
 private:
   void Initialize();
-
-  double dispKp; // * we'll hold on to the tuning parameters in user-entered
-  double dispKi; //   format for display purposes
-  double dispKd; //
 
   double kp; // * (P)roportional Tuning Parameter
   double ki; // * (I)ntegral Tuning Parameter
@@ -103,7 +100,7 @@ private:
       *mySetpoint; //   PID, freeing the user from having to constantly tell us
                    //   what these values are.  with pointers we'll just know.
 
-  unsigned long lastTime;
+  unsigned long lastTime, lastSampleTime;
   double outputSum, lastInput;
 
   unsigned long SampleTime;
